@@ -34,6 +34,7 @@ class EventList(Converter, object):
 		self.epgcache = eEPGCache.getInstance()
 		self.primetime = 0
 		self.eventcount = 0
+		self.beginOnly = False
 		if (len(type)):
 			args = type.split(',')
 			i = 0
@@ -44,6 +45,9 @@ class EventList(Converter, object):
 				elif type_c == "primetime":
 					if value == "yes":
 						self.primetime = 1
+				elif type_c == "beginOnly":
+					if value == "yes":
+						self.beginOnly = True
 				i += 1
 	@cached
 	def getContent(self):
@@ -75,7 +79,10 @@ class EventList(Converter, object):
 		return contentList
 
 	def getEventTuple(self, event):
-		time = "%s - %s" % (strftime("%H:%M", localtime(event.getBeginTime())), strftime("%H:%M", localtime(event.getBeginTime() + event.getDuration())))
+		if self.beginOnly:
+			time = "%s" % ( strftime("%H:%M", localtime(event.getBeginTime())), )
+		else:
+			time = "%s - %s" % (strftime("%H:%M", localtime(event.getBeginTime())), strftime("%H:%M", localtime(event.getBeginTime() + event.getDuration())))
 		title = event.getEventName()
 		duration = "%d min" % (event.getDuration() / 60)
 		return (time, title, duration)
